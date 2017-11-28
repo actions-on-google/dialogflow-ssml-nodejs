@@ -35,21 +35,39 @@ process.env.DEBUG = 'actions-on-google:*';
  * `;
  * // Equivalent to ssml`\n  <speak>\n    ${equation}\n  </speak>\n`
  * console.log(response);
- * // Prints: '<speak>&quot;1 + 1 &gt; 1&quot;</speak>'
+ *
+ * Prints:
+ * `<speak>
+ *   &quot;1 + 1 &gt; 1&quot;
+ * </speak>`
+ * Equivalent to
+ * '<speak>\n  &quot;1 + 1 &gt; 1&quot;\n</speak>'
  *
  * @param {TemplateStringsArray} template Non sanitized constant strings in the template literal
  * @param {Array<string>} inputs Computed expressions to be sanitized surrounded by ${}
  */
-const ssml = (template, ...inputs) => template.reduce((out, str, i) => i
-  ? out + (
-    inputs[i - 1]
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-  ) + str
-  : str
-).trim().replace(/\s+/g, ' ').replace(/ </g, '<').replace(/> /g, '>');
+const ssml = (template, ...inputs) => {
+  // Generate the raw escaped string
+  const raw = template.reduce((out, str, i) => i
+    ? out + (
+      inputs[i - 1]
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+    ) + str
+    : str
+  );
+  // Trim out new lines at the start and end but keep indentation
+  const trimmed = raw
+    .replace(/^\s*\n(\s*)<speak>/, '$1<speak>')
+    .replace(/<\/speak>\s+$/, '</speak>');
+  // Remove extra indentation
+  const lines = trimmed.split('\n');
+  const indent = /^\s*/.exec(lines[0])[0];
+  const match = new RegExp(`^${indent}`);
+  return lines.map(line => line.replace(match, '')).join('\n');
+};
 
 const examples = {
   break: ssml`
@@ -183,6 +201,40 @@ const examples = {
       <prosody pitch="low">This is speaking at low pitch.</prosody>
       <prosody pitch="-12st">This is speaking at -12 semitones pitch.</prosody>
       <prosody pitch="x-low">This is speaking at x-low pitch.</prosody>
+    </speak>
+  `,
+  layered: ssml`
+    <speak>
+      The key element for layered sound mixing is <sub alias="par">${'<par>'}</sub>
+      (as in "parallel") which inserts a mixed sound at the current point of the TTS.
+      It is similar to the <sub alias="paragraph">${'<p>'}</sub>
+      element with an important difference of not displaying
+      the text content in chat bubbles on surfaces with displays.
+      <par>
+        <media xml:id="first_thing" begin="2.5s">
+          <speak>
+            This media element contains a <sub alias="speak element">${'<speak>'}</sub> for TTS.
+            It has an <say-as interpret-as="verbatim">xml:id</say-as> attribute so that other
+            <sub alias="media">${'<media>'}</sub> elements can refer to it.
+            There is also a "begin" attribute that delays the start time by 2.5 seconds.
+            Millisecond units are also supported by the
+            <say-as interpret-as="letters">ms</say-as> suffix.
+          </speak>
+        </media>
+        <media xml:id="second_thing" soundLevel="-1dB" repeatCount="3">
+          <audio src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg">
+            The sound source for this <sub alias="audio">${'<audio>'}</sub> element is missing.
+            Find more sounds at https://developers.google.com/actions/tools/sound-library.
+          </audio>
+        </media>
+        <media xml:id="last_thing" begin="first_thing.end + 1234ms">
+          <speak>
+            This TTS starts <say-as interpret-as="units">1234 milliseconds</say-as>
+            after the end of the media element with the
+            <say-as interpret-as="verbatim">xml:id</say-as> equal to "first_thing".
+          </speak>
+        </media>
+      </par>
     </speak>
   `
 };
