@@ -93,7 +93,6 @@ const examples = {
     <speak>
       I would like to emphasize the importance of SSML.
       I told you to pick up those toys an hour ago.
-      <emphasis>I told you to pick up those toys an hour ago.</emphasis>
       <emphasis level="strong">I told you to pick up those toys an hour ago.</emphasis>
       <emphasis level="moderate">I told you to pick up those toys an hour ago.</emphasis>
       <emphasis level="reduced">I told you to pick up those toys an hour ago.</emphasis>
@@ -122,7 +121,6 @@ const examples = {
       <prosody volume="+5dB">This is speaking at +5dB volume.</prosody>
       <prosody volume="100%">This is speaking at 100% volume.</prosody>
       <prosody volume="loud">This is speaking at loud volume.</prosody>
-      <prosody volume="foo">This is speaking at normal volume.</prosody>
       <prosody volume="+10dB">This is speaking at +10dB volume.</prosody>
       <prosody volume="medium">This is speaking at medium volume.</prosody>
       <prosody volume="x-loud">This is speaking at x-loud volume.</prosody>
@@ -137,7 +135,6 @@ const examples = {
     <speak>
       This is without prosody.
       <prosody pitch="+6st">This is speaking at +6 semitones pitch.</prosody>
-      <prosody pitch="foo">This is speaking at normal pitch.</prosody>
       <prosody pitch="high">This is speaking at high pitch.</prosody>
       <prosody pitch="+0st">This is speaking at +0 semitones pitch.</prosody>
       <prosody pitch="medium">This is speaking at medium pitch.</prosody>
